@@ -55,6 +55,29 @@ if os.environ.get('RAILWAY_ENVIRONMENT_NAME'):
     if railway_host and railway_host not in ALLOWED_HOSTS:
         ALLOWED_HOSTS.append(railway_host)
 
+# CSRF Trusted Origins for Railway deployment
+CSRF_TRUSTED_ORIGINS = [
+    'https://web-production-c249d.up.railway.app',
+    'https://*.railway.app',
+    'https://*.up.railway.app',
+]
+
+# Add development origins if in DEBUG mode
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS.extend([
+        'http://localhost:8000',
+        'http://127.0.0.1:8000',
+        'http://0.0.0.0:8000',
+    ])
+
+# Add Railway domain from environment if available
+if os.environ.get('RAILWAY_ENVIRONMENT_NAME'):
+    railway_host = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+    if railway_host:
+        railway_url = f'https://{railway_host}'
+        if railway_url not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(railway_url)
+
 
 # Application definition
 
