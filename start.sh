@@ -5,7 +5,7 @@
 
 set -e  # Exit on any error
 
-echo "🚀 Starting Django Claims Management System deployment..."
+echo "🚀 Starting Django Claims Management System deployment (v2)..."
 echo "📍 Current directory: $(pwd)"
 echo "📁 Files in directory: $(ls -la)"
 
