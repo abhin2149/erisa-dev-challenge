@@ -35,7 +35,13 @@ if not SECRET_KEY:
 if DEBUG:
     ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 else:
-    ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOST', 'localhost')]
+    # Production allowed hosts
+    ALLOWED_HOSTS = ['web-production-c249d.up.railway.app']
+    
+    # Add any additional hosts from environment variable
+    additional_host = os.environ.get('ALLOWED_HOST')
+    if additional_host:
+        ALLOWED_HOSTS.append(additional_host)
 
 
 # Application definition
