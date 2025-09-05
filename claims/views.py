@@ -99,7 +99,7 @@ def claims_list(request):
         
     except DatabaseError as e:
         logger.error(f"Database error in claims_list: {str(e)}", exc_info=True)
-        messages.error(request, "Database error occurred. Please try again.")
+        messages.error(request, "We're experiencing database issues. Please try refreshing the page or contact support if the problem persists.")
         return render(request, 'claims/claims_list.html', {
             'claims': [],
             'search_query': '',
@@ -109,7 +109,7 @@ def claims_list(request):
         })
     except Exception as e:
         logger.error(f"Unexpected error in claims_list: {str(e)}", exc_info=True)
-        messages.error(request, "An unexpected error occurred. Please try again.")
+        messages.error(request, "Something went wrong while loading claims. Please try refreshing the page.")
         return render(request, 'claims/claims_list.html', {
             'claims': [],
             'search_query': '',
@@ -179,10 +179,14 @@ def claim_detail(request, claim_id):
         raise  # Re-raise 404 errors
     except DatabaseError as e:
         logger.error(f"Database error in claim_detail for ID {claim_id}: {str(e)}", exc_info=True)
-        return JsonResponse({'error': 'Database error occurred'}, status=500)
+        return JsonResponse({
+            'error': 'Unable to load claim details due to database issues. Please try again.'
+        }, status=500)
     except Exception as e:
         logger.error(f"Unexpected error in claim_detail for ID {claim_id}: {str(e)}", exc_info=True)
-        return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
+        return JsonResponse({
+            'error': 'Sorry, we couldn\'t load this claim\'s details. Please try again.'
+        }, status=500)
 
 
 @login_required
@@ -293,10 +297,14 @@ def add_note(request, claim_id):
                 
             except ValidationError as e:
                 logger.error(f"Validation error adding note to claim {claim_id}: {str(e)}")
-                return JsonResponse({'error': 'Invalid note content'}, status=400)
+                return JsonResponse({
+                    'error': 'Unable to save your note. Please check the content and try again.'
+                }, status=400)
             except DatabaseError as e:
                 logger.error(f"Database error adding note to claim {claim_id}: {str(e)}", exc_info=True)
-                return JsonResponse({'error': 'Database error occurred'}, status=500)
+                return JsonResponse({
+                    'error': 'Failed to save note due to database issues. Please try again.'
+                }, status=500)
         else:
             logger.debug(f"Empty note text submitted for claim {claim_id}")
         
@@ -331,7 +339,7 @@ def dashboard(request):
     """Admin dashboard with statistics - Admin only"""
     # Check if user is admin
     if not is_admin_user(request.user):
-        messages.error(request, 'Access denied. Dashboard is only available to administrators.')
+        messages.error(request, 'Access denied. You need administrator privileges to view the dashboard.')
         return redirect('claims:claims_list')
     # Calculate statistics
     stats = {

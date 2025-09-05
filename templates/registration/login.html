@@ -13,9 +13,52 @@
             </div>
             <div class="card-body">
                 {% if form.errors %}
-                    <div class="alert alert-danger">
-                        {{ form.errors }}
+                    <div class="alert alert-danger" role="alert">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong>Login Failed</strong>
+                        </div>
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                {% if field == '__all__' %}
+                                    <div class="mb-1">
+                                        {% if 'Invalid username or password' in error or 'incorrect' in error %}
+                                            <i class="bi bi-shield-x me-1"></i>
+                                            The username and password you entered don't match our records. Please check your credentials and try again.
+                                        {% else %}
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            {{ error }}
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <div class="mb-1">
+                                        <i class="bi bi-arrow-right me-1"></i>
+                                        <strong>{{ field|capfirst }}:</strong> {{ error }}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
                     </div>
+                {% endif %}
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            <div class="d-flex align-items-center">
+                                {% if message.tags == 'error' %}
+                                    <i class="bi bi-exclamation-circle-fill me-2"></i>
+                                {% elif message.tags == 'success' %}
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                {% elif message.tags == 'warning' %}
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                {% else %}
+                                    <i class="bi bi-info-circle-fill me-2"></i>
+                                {% endif %}
+                                {{ message }}
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
                 {% endif %}
                 
                 <form method="post">
@@ -24,32 +67,101 @@
                         <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-person"></i></span>
-                            <input type="text" class="form-control" name="{{ form.username.name }}" 
-                                   id="{{ form.username.id_for_label }}" required>
+                            <input type="text" 
+                                   class="form-control {% if form.username.errors %}is-invalid{% endif %}" 
+                                   name="{{ form.username.name }}" 
+                                   id="{{ form.username.id_for_label }}" 
+                                   value="{{ form.username.value|default:'' }}"
+                                   placeholder="Enter your username"
+                                   required>
                         </div>
+                        {% if form.username.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.username.errors %}
+                                    <small><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
                     
                     <div class="mb-3">
                         <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                            <input type="password" class="form-control" name="{{ form.password.name }}" 
-                                   id="{{ form.password.id_for_label }}" required>
+                            <input type="password" 
+                                   class="form-control {% if form.password.errors %}is-invalid{% endif %}" 
+                                   name="{{ form.password.name }}" 
+                                   id="{{ form.password.id_for_label }}" 
+                                   placeholder="Enter your password"
+                                   required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="bi bi-eye" id="toggleIcon"></i>
+                            </button>
                         </div>
+                        {% if form.password.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.password.errors %}
+                                    <small><i class="bi bi-exclamation-circle me-1"></i>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
                     
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    <button type="submit" class="btn btn-primary w-100" id="loginBtn">
+                        <span class="login-spinner spinner-border spinner-border-sm me-2 d-none" role="status"></span>
+                        <i class="bi bi-box-arrow-in-right" id="loginIcon"></i> 
+                        <span id="loginText">Login</span>
                     </button>
                 </form>
                 
                 <div class="text-center mt-3">
                     <small class="text-muted">
-                        Demo users: admin/admin or testuser/testpass
+                        <i class="bi bi-info-circle me-1"></i>
+                        <strong>Demo credentials:</strong> admin/admin123 or testuser/testpass
                     </small>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+// Password visibility toggle
+document.getElementById('togglePassword').addEventListener('click', function() {
+    const passwordInput = document.getElementById('{{ form.password.id_for_label }}');
+    const toggleIcon = document.getElementById('toggleIcon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.className = 'bi bi-eye-slash';
+    } else {
+        passwordInput.type = 'password';
+        toggleIcon.className = 'bi bi-eye';
+    }
+});
+
+// Login form submission handling
+document.querySelector('form').addEventListener('submit', function(e) {
+    const loginBtn = document.getElementById('loginBtn');
+    const loginSpinner = document.querySelector('.login-spinner');
+    const loginIcon = document.getElementById('loginIcon');
+    const loginText = document.getElementById('loginText');
+    
+    // Show loading state
+    loginBtn.disabled = true;
+    loginSpinner.classList.remove('d-none');
+    loginIcon.classList.add('d-none');
+    loginText.textContent = 'Signing In...';
+    
+    // Re-enable button after 5 seconds if form doesn't submit (network issues)
+    setTimeout(() => {
+        if (loginBtn.disabled) {
+            loginBtn.disabled = false;
+            loginSpinner.classList.add('d-none');
+            loginIcon.classList.remove('d-none');
+            loginText.textContent = 'Login';
+        }
+    }, 5000);
+});
+</script>
 {% endblock %}

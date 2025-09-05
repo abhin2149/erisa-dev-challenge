@@ -102,8 +102,12 @@
                             {% endif %}
                             {% if form.operation.errors %}
                                 <div class="alert alert-danger mt-2">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                        <strong>Operation Type Error</strong>
+                                    </div>
                                     {% for error in form.operation.errors %}
-                                        <div>{{ error }}</div>
+                                        <div><i class="bi bi-arrow-right me-1"></i>{{ error }}</div>
                                     {% endfor %}
                                 </div>
                             {% endif %}
