@@ -44,8 +44,15 @@ source venv/bin/activate
 # 4. Run setup
 bash start.sh
 
-# 4. Start server
+# 5. Start server
 python manage.py runserver
+
+# 6. Login
+admin
+admin123
+
+# 7. Navigate to /data-admin/data-upload/
+Upload the required claim_list and claim_detail_data.csv files (or any other with the specified format)
 ```
 
 ### 🔐 Access Credentials
