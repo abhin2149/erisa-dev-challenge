@@ -27,17 +27,21 @@ A comprehensive Django web application for managing insurance claims with modern
 
 ### Prerequisites
 - Python 3.9+
-- Virtual environment (included)
+- Virtual environment
 
-### Launch in 3 Steps
+### Steps to run
 ```bash
-# 1. Navigate to project
+# 1. Clone the repo and Navigate to project
+git clone https://github.com/abhin2149/erisa-dev-challenge
 cd insurance-claim-app
 
-# 2. Activate environment  
+# 2. Install requirements  
+pip install -r requirements.txt
+
+# 3. Activate venv
 source venv/bin/activate
 
-# 3. Start server
+#4. Start server
 python manage.py runserver
 ```
 
@@ -150,43 +154,3 @@ id|patient_name|billed_amount|paid_amount|status|insurer_name|discharge_date
 - **Sample CSV/JSON files** for upload testing
 - **Pre-configured users** for immediate access
 - **Professional formatting** throughout
-
-## 🛠️ Customization
-
-### Configuration Options
-```python
-# models.py - Add new status types
-status_choices = [
-    ('Paid', 'Paid'),
-    ('Denied', 'Denied'), 
-    ('Under Review', 'Under Review'),
-    ('Your_Status', 'Your Status')  # Add here
-]
-```
-
-### Styling Customization
-- **Colors**: Edit `templates/base.html` CSS section
-- **Layout**: Modify Bootstrap classes in templates
-- **Branding**: Update navigation and headers
-
-## 📊 System Stats
-
-- **Claims Processed**: 6,201+ sample records
-- **Performance**: <100ms page loads with pagination
-- **Security**: Multi-layer access control implemented  
-- **File Support**: CSV/JSON with validation
-- **Database**: Optimized with proper indexes
-- **UI/UX**: Modern responsive design with accessibility
-
-## 🔍 Production Ready
-
-✅ **Security**: Role-based access, input validation, CSRF protection  
-✅ **Performance**: Query optimization, pagination, caching  
-✅ **Error Handling**: Comprehensive logging and user feedback  
-✅ **Data Integrity**: Transaction safety and backup capabilities  
-✅ **User Experience**: Professional UI with loading states  
-✅ **Documentation**: Complete setup and usage guides  
-
----
-
-**🎉 Enterprise-grade claims management system ready for production deployment!**
