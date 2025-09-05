@@ -1,0 +1,121 @@
+{% load humanize %}
+<!-- Update modal title -->
+<script>
+    document.getElementById('claimDetailModalLabel').innerHTML = 'Claim #{{ claim.id }} - {{ claim.patient_name }}';
+</script>
+
+<div class="container-fluid">
+        <!-- Basic Information -->
+        <div class="row mb-3">
+            <div class="col-6">
+                <small class="text-muted">Patient</small>
+                <div class="fw-semibold">{{ claim.patient_name }}</div>
+            </div>
+            <div class="col-6">
+                <small class="text-muted">Discharge Date</small>
+                <div class="fw-semibold">{{ claim.discharge_date|date:"M j, Y" }}</div>
+            </div>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-6">
+                <small class="text-muted">Billed Amount</small>
+                <div class="fw-semibold text-danger">${{ claim.billed_amount|floatformat:2|intcomma }}</div>
+            </div>
+            <div class="col-6">
+                <small class="text-muted">Paid Amount</small>
+                <div class="fw-semibold text-success">${{ claim.paid_amount|floatformat:2|intcomma }}</div>
+            </div>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-6">
+                <small class="text-muted">Status</small>
+                <div>
+                    {% if claim.status == 'Paid' %}
+                        <span class="badge status-paid claim-status">
+                            {{ claim.status }}
+                        </span>
+                    {% elif claim.status == 'Denied' %}
+                        <span class="badge status-denied claim-status">
+                            {{ claim.status }}
+                        </span>
+                    {% else %}
+                        <span class="badge status-under-review claim-status">
+                            {{ claim.status }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-6">
+                <small class="text-muted">Insurer</small>
+                <div class="fw-semibold">{{ claim.insurer_name }}</div>
+            </div>
+        </div>
+        
+        <!-- Claim Details -->
+        {% if claim_details %}
+            <hr>
+            <div class="mb-3">
+                <small class="text-muted">CPT Codes</small>
+                <div class="fw-semibold">{{ claim_details.cpt_codes }}</div>
+            </div>
+            
+            {% if claim_details.denial_reason %}
+                <div class="mb-3">
+                    <small class="text-muted">Denial Reason</small>
+                    <div class="alert alert-warning small mb-0">
+                        {{ claim_details.denial_reason }}
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+        
+        <!-- Quick Actions -->
+        <hr>
+        <div class="mb-3">
+            <h6 class="fw-semibold">
+Quick Actions
+            </h6>
+            
+            <div class="d-grid gap-2">
+                {% if not user_has_flagged %}
+                    <form hx-post="{% url 'claims:flag_claim' claim.id %}" 
+                          hx-target="#notes-annotations-container">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+Flag for Review
+                        </button>
+                    </form>
+                {% else %}
+                    <button class="btn btn-danger btn-sm" disabled>
+Already Flagged
+                    </button>
+                {% endif %}
+            </div>
+            
+            <!-- Add Note Form -->
+            <div class="mt-3">
+                <form hx-post="{% url 'claims:add_note' claim.id %}" 
+                      hx-target="#notes-annotations-container"
+                      hx-on::after-request="this.reset()">
+                    {% csrf_token %}
+                    <div class="mb-2">
+                        <textarea class="form-control" 
+                                  name="note_text" 
+                                  rows="3" 
+                                  placeholder="Add a note..."
+                                  required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">
+Add Note
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+    <!-- Notes & Annotations -->
+    <div id="notes-annotations-container">
+        {% include 'claims/partials/notes_annotations.html' %}
+    </div>
+</div>

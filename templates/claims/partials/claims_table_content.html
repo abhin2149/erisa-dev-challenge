@@ -1,0 +1,168 @@
+{% load humanize %}
+<div class="table-responsive">
+    <table class="table table-hover mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>Claim ID</th>
+                <th>Patient</th>
+                <th class="text-end">Billed</th>
+                <th class="text-end">Paid</th>
+                <th>Status</th>
+                <th>Insurer</th>
+                <th>Discharge Date</th>
+                <th>Flags</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for claim in claims %}
+            <tr style="cursor: pointer;" 
+                onclick="showClaimDetail({{ claim.id }})"
+                class="claim-row"
+                data-claim-id="{{ claim.id }}">
+                <td>
+                    <strong class="text-primary">#{{ claim.id }}</strong>
+                </td>
+                <td>{{ claim.patient_name }}</td>
+                <td class="text-end">${{ claim.billed_amount|floatformat:2|intcomma }}</td>
+                <td class="text-end">${{ claim.paid_amount|floatformat:2|intcomma }}</td>
+                <td>
+                    {% if claim.status == 'Paid' %}
+                        <span class="badge status-paid claim-status">
+                            {{ claim.status }}
+                        </span>
+                    {% elif claim.status == 'Denied' %}
+                        <span class="badge status-denied claim-status">
+                            {{ claim.status }}
+                        </span>
+                    {% else %}
+                        <span class="badge status-under-review claim-status">
+                            {{ claim.status }}
+                        </span>
+                    {% endif %}
+                </td>
+                <td>{{ claim.insurer_name }}</td>
+                <td>{{ claim.discharge_date|date:"M j, Y" }}</td>
+                <td>
+                    {% if claim.flags.exists %}
+                        <span class="badge bg-danger">
+                            {{ claim.flags.count }}
+                        </span>
+                    {% else %}
+                        <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center text-muted py-4">
+                    <div class="mt-2">No claims found matching your criteria.</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% if claims.has_other_pages %}
+<div class="d-flex justify-content-between align-items-center p-3 border-top bg-light">
+    <div class="text-muted small">
+        Showing {{ claims.start_index }}-{{ claims.end_index }} of {{ claims.paginator.count }} claims
+    </div>
+    
+    <nav aria-label="Claims pagination">
+        <ul class="pagination pagination-sm mb-0">
+            <!-- First page -->
+            {% if claims.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" 
+                       hx-get="{% url 'claims:claims_list' %}?page=1&search={{ search_query }}&status={{ status_filter }}&page_size={{ page_size }}"
+                       hx-target="#claims-table-container"
+                       title="First page">
+                        &laquo;&laquo;
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" 
+                       hx-get="{% url 'claims:claims_list' %}?page={{ claims.previous_page_number }}&search={{ search_query }}&status={{ status_filter }}&page_size={{ page_size }}"
+                       hx-target="#claims-table-container"
+                       title="Previous page">
+                        &laquo;
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;&laquo;</span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;</span>
+                </li>
+            {% endif %}
+            
+            <!-- Page numbers -->
+            {% for num in claims.paginator.page_range %}
+                {% if claims.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > claims.number|add:'-3' and num < claims.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" 
+                           hx-get="{% url 'claims:claims_list' %}?page={{ num }}&search={{ search_query }}&status={{ status_filter }}&page_size={{ page_size }}"
+                           hx-target="#claims-table-container">{{ num }}</a>
+                    </li>
+                {% elif num == 1 or num == claims.paginator.num_pages %}
+                    <li class="page-item">
+                        <a class="page-link" 
+                           hx-get="{% url 'claims:claims_list' %}?page={{ num }}&search={{ search_query }}&status={{ status_filter }}&page_size={{ page_size }}"
+                           hx-target="#claims-table-container">{{ num }}</a>
+                    </li>
+                {% elif num == claims.number|add:'-4' or num == claims.number|add:'4' %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            
+            <!-- Next page -->
+            {% if claims.has_next %}
+                <li class="page-item">
+                    <a class="page-link" 
+                       hx-get="{% url 'claims:claims_list' %}?page={{ claims.next_page_number }}&search={{ search_query }}&status={{ status_filter }}&page_size={{ page_size }}"
+                       hx-target="#claims-table-container"
+                       title="Next page">
+                        &raquo;
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" 
+                       hx-get="{% url 'claims:claims_list' %}?page={{ claims.paginator.num_pages }}&search={{ search_query }}&status={{ status_filter }}&page_size={{ page_size }}"
+                       hx-target="#claims-table-container"
+                       title="Last page">
+                        &raquo;&raquo;
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;</span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;&raquo;</span>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endif %}
+
+<script>
+function showClaimDetail(claimId) {
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('claimDetailModal'));
+    modal.show();
+    
+    // Load claim details via HTMX
+    htmx.ajax('GET', `/claims/claim/${claimId}/details/`, {
+        target: '#claim-detail-modal-content'
+    });
+}</script>

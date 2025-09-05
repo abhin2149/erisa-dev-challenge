@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block title %}{{ title }} - Claims Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Back to Dashboard -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <a href="{% url 'data_admin_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow border-0 bg-primary text-white">
+                <div class="card-body">
+                    <h1 class="card-title h2 mb-0">
+                        <i class="bi bi-upload"></i>
+                        Upload Claims Data
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Instructions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow border-0">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title h5 mb-0">
+                        <i class="bi bi-info-circle"></i>
+                        Data Upload Instructions
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item border-0 px-0">
+                                    <i class="bi bi-file-earmark-text text-primary me-2"></i>
+                                    <strong>CSV Format:</strong> Use pipe-delimited (|) files with proper headers
+                                </li>
+                                <li class="list-group-item border-0 px-0">
+                                    <i class="bi bi-code-square text-success me-2"></i>
+                                    <strong>JSON Format:</strong> Use properly formatted JSON arrays
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-lg-6">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item border-0 px-0">
+                                    <i class="bi bi-arrow-repeat text-info me-2"></i>
+                                    <strong>Add vs Overwrite:</strong> Choose whether to add new data or replace all existing data
+                                </li>
+                                <li class="list-group-item border-0 px-0">
+                                    <i class="bi bi-file-check text-warning me-2"></i>
+                                    <strong>File Requirements:</strong> Claims file is required, details file is optional
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Upload Form -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow border-0">
+                <div class="card-header bg-light">
+                    <h2 class="card-title h4 mb-0">
+                        <i class="bi bi-cloud-upload"></i>
+                        Upload Form
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Operation Choice -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Operation Type:</label>
+                            <div class="mt-2">
+                                {% for choice in form.operation %}
+                                    <div class="form-check">
+                                        {{ choice.tag }}
+                                        <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                            {{ choice.choice_label }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {% if form.operation.help_text %}
+                                <div class="form-text">{{ form.operation.help_text }}</div>
+                            {% endif %}
+                            {% if form.operation.errors %}
+                                <div class="alert alert-danger mt-2">
+                                    {% for error in form.operation.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Overwrite Warning -->
+                        <div class="alert alert-warning d-none" id="overwrite-warning">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong>Warning:</strong> Overwrite operation will delete ALL existing claims and details data before importing new data. This action cannot be undone!
+                        </div>
+
+                        <!-- File Type Choice -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">File Type:</label>
+                            <div class="mt-2">
+                                {% for choice in form.file_type %}
+                                    <div class="form-check form-check-inline">
+                                        {{ choice.tag }}
+                                        <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                            {{ choice.choice_label }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {% if form.file_type.help_text %}
+                                <div class="form-text">{{ form.file_type.help_text }}</div>
+                            {% endif %}
+                            {% if form.file_type.errors %}
+                                <div class="alert alert-danger mt-2">
+                                    {% for error in form.file_type.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Claims File Upload -->
+                        <div class="mb-4">
+                            <label for="{{ form.claims_file.id_for_label }}" class="form-label fw-bold">{{ form.claims_file.label }}:</label>
+                            <div class="border-2 border-dashed rounded p-4 text-center bg-light" style="border-color: #dee2e6 !important;" onmouseover="this.style.borderColor='#0d6efd'" onmouseout="this.style.borderColor='#dee2e6'">
+                                {{ form.claims_file }}
+                                <div class="mt-2 text-muted">
+                                    <i class="bi bi-cloud-upload fs-2"></i>
+                                    <p class="mb-0">Drop your claims file here or click to browse</p>
+                                </div>
+                            </div>
+                            {% if form.claims_file.help_text %}
+                                <div class="form-text">{{ form.claims_file.help_text }}</div>
+                            {% endif %}
+                            {% if form.claims_file.errors %}
+                                <div class="alert alert-danger mt-2">
+                                    {% for error in form.claims_file.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Claim Details File Upload -->
+                        <div class="mb-4">
+                            <label for="{{ form.claim_details_file.id_for_label }}" class="form-label fw-bold">{{ form.claim_details_file.label }} <span class="badge bg-secondary">Optional</span>:</label>
+                            <div class="border-2 border-dashed rounded p-4 text-center bg-light" style="border-color: #dee2e6 !important;" onmouseover="this.style.borderColor='#198754'" onmouseout="this.style.borderColor='#dee2e6'">
+                                {{ form.claim_details_file }}
+                                <div class="mt-2 text-muted">
+                                    <i class="bi bi-file-earmark-plus fs-2"></i>
+                                    <p class="mb-0">Drop your claim details file here or click to browse (optional)</p>
+                                </div>
+                            </div>
+                            {% if form.claim_details_file.help_text %}
+                                <div class="form-text">{{ form.claim_details_file.help_text }}</div>
+                            {% endif %}
+                            {% if form.claim_details_file.errors %}
+                                <div class="alert alert-danger mt-2">
+                                    {% for error in form.claim_details_file.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-upload me-2"></i>
+                                Upload Data
+                            </button>
+                            <a href="{% url 'data_admin_dashboard' %}" class="btn btn-secondary btn-lg">
+                                <i class="bi bi-x-circle me-2"></i>
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow border-0">
+                <div class="card-header bg-success text-white">
+                    <h3 class="card-title h5 mb-0">
+                        <i class="bi bi-download"></i>
+                        Export Existing Data
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Download your current claims data for backup or analysis:</p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="{% url 'data_admin_export' %}?format=json" class="btn btn-outline-success">
+                            <i class="bi bi-file-earmark-code me-2"></i>
+                            Export as JSON
+                        </a>
+                        <a href="{% url 'data_admin_export' %}?format=csv" class="btn btn-outline-success">
+                            <i class="bi bi-file-earmark-csv me-2"></i>
+                            Export Claims CSV
+                        </a>
+                        <a href="{% url 'data_admin_export' %}?format=csv&type=details" class="btn btn-outline-success">
+                            <i class="bi bi-file-earmark-text me-2"></i>
+                            Export Details CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Data Stats -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow border-0">
+                <div class="card-header bg-light">
+                    <h4 class="card-title h5 mb-0">
+                        <i class="bi bi-graph-up"></i>
+                        Current Database Statistics
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="p-3">
+                                <div class="h2 text-primary fw-bold">{{ claims_count }}</div>
+                                <div class="text-muted">Total Claims</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="p-3">
+                                <div class="h2 text-success fw-bold">{{ details_count }}</div>
+                                <div class="text-muted">Total Claim Details</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="p-3">
+                                <div class="h2 text-warning fw-bold">{{ flags_count }}</div>
+                                <div class="text-muted">Total Flags</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="p-3">
+                                <div class="h2 text-info fw-bold">{{ notes_count }}</div>
+                                <div class="text-muted">Total Notes</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    input[type="file"] {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        background-color: #fff;
+    }
+    
+    input[type="file"]:focus {
+        border-color: #86b7fe;
+        outline: 0;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Show/hide overwrite warning
+    document.addEventListener('DOMContentLoaded', function() {
+        const operationRadios = document.querySelectorAll('input[name="operation"]');
+        const warningBox = document.getElementById('overwrite-warning');
+        
+        function toggleWarning() {
+            const selectedOperation = document.querySelector('input[name="operation"]:checked');
+            if (selectedOperation && selectedOperation.value === 'overwrite') {
+                warningBox.classList.remove('d-none');
+            } else {
+                warningBox.classList.add('d-none');
+            }
+        }
+        
+        operationRadios.forEach(radio => {
+            radio.addEventListener('change', toggleWarning);
+        });
+        
+        // Check initial state
+        toggleWarning();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Claims List - Claims Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Full Width Claims Table Section -->
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    Claims List
+                </h5>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge bg-light text-dark">
+                        {{ claims.paginator.count }} total claims
+                    </span>
+                    <!-- Page Size Selector -->
+                    <select class="form-select form-select-sm" 
+                            name="page_size" 
+                            style="width: auto;"
+                            hx-get="{% url 'claims:claims_list' %}"
+                            hx-target="#claims-table-container"
+                            hx-include="[name='search'], [name='status']">
+                        <option value="10" {% if page_size == 10 %}selected{% endif %}>10 per page</option>
+                        <option value="20" {% if page_size == 20 %}selected{% endif %}>20 per page</option>
+                        <option value="50" {% if page_size == 50 %}selected{% endif %}>50 per page</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="card-body p-0">
+                <!-- Search and Filter Bar -->
+                <div class="p-3 bg-light border-bottom search-bar">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                </span>
+                                <input type="text" 
+                                       class="form-control" 
+                                       placeholder="Search by patient name or insurer..."
+                                       value="{{ search_query }}"
+                                       hx-get="{% url 'claims:claims_list' %}"
+                                       hx-target="#claims-table-container"
+                                       hx-trigger="keyup changed delay:300ms"
+                                       hx-include="[name='status'], [name='page_size']"
+                                       name="search">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" 
+                                    name="status"
+                                    hx-get="{% url 'claims:claims_list' %}"
+                                    hx-target="#claims-table-container"
+                                    hx-include="[name='search'], [name='page_size']">
+                                <option value="">All Statuses</option>
+                                {% for choice in status_choices %}
+                                    <option value="{{ choice.0 }}" {% if status_filter == choice.0 %}selected{% endif %}>
+                                        {{ choice.1 }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-secondary w-100" 
+                                    onclick="document.querySelector('[name=search]').value=''; document.querySelector('[name=status]').value=''; htmx.trigger('[name=search]', 'keyup')">
+Clear
+                            </button>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <span class="text-muted small">
+                                Showing {{ claims.start_index }}-{{ claims.end_index }} of {{ claims.paginator.count }} claims
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Claims Table -->
+                <div id="claims-table-container">
+                    {% include 'claims/partials/claims_table_content.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Claim Detail Modal -->
+<div class="modal fade" id="claimDetailModal" tabindex="-1" aria-labelledby="claimDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="claimDetailModalLabel">
+Claim Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="claim-detail-modal-content">
+                <div class="text-center text-muted py-4">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="mt-2">Loading claim details...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

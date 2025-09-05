@@ -1,0 +1,135 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .data-management-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .data-management-card h2 {
+        color: white;
+        margin-bottom: 10px;
+    }
+    .data-management-card p {
+        margin-bottom: 15px;
+        opacity: 0.9;
+    }
+    .data-management-card .button {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 8px 16px;
+        text-decoration: none;
+        border-radius: 4px;
+        display: inline-block;
+        margin-right: 10px;
+        transition: all 0.3s ease;
+    }
+    .data-management-card .button:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-1px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-main">
+    <!-- Data Management Card -->
+    <div class="data-management-card">
+        <h2>📊 Claims Data Management</h2>
+        <p>Upload new claims data, export existing data, and manage your claims database with powerful import/export tools.</p>
+        <a href="/data-admin/data-upload/" class="button">
+            Upload Claims Data
+        </a>
+        <a href="/data-admin/data-export/?format=json" class="button">
+            Export Data
+        </a>
+        <a href="/data-admin/" class="button">
+            Data Management Admin
+        </a>
+    </div>
+
+    <!-- Default Django Admin Content -->
+    <div id="content-main">
+        {% if app_list %}
+            {% for app in app_list %}
+                <div class="app-{{ app.app_label }} module">
+                    <table>
+                        <caption>
+                            <a href="{{ app.app_url }}" class="section" title="{% blocktranslate with name=app.name %}Models in the {{ name }} application{% endblocktranslate %}">{{ app.name }}</a>
+                        </caption>
+                        {% for model in app.models %}
+                            <tr class="model-{{ model.object_name|lower }}">
+                                {% if model.admin_url %}
+                                    <th scope="row"><a href="{{ model.admin_url }}">{{ model.name }}</a></th>
+                                {% else %}
+                                    <th scope="row">{{ model.name }}</th>
+                                {% endif %}
+
+                                {% if model.add_url %}
+                                    <td><a href="{{ model.add_url }}" class="addlink">{% translate 'Add' %}</a></td>
+                                {% else %}
+                                    <td>&nbsp;</td>
+                                {% endif %}
+
+                                {% if model.admin_url %}
+                                    {% if model.view_only %}
+                                        <td><a href="{{ model.admin_url }}" class="viewlink">{% translate 'View' %}</a></td>
+                                    {% else %}
+                                        <td><a href="{{ model.admin_url }}" class="changelink">{% translate 'Change' %}</a></td>
+                                    {% endif %}
+                                {% else %}
+                                    <td>&nbsp;</td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>{% translate "You don't have permission to view or edit anything." %}</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div id="content-related">
+    <div class="module" id="recent-actions-module">
+        <h2>{% translate 'Quick Links' %}</h2>
+        <ul class="actionlist">
+            <li class="addlink">
+                <a href="/data-admin/data-upload/">
+                    Upload Claims Data
+                </a>
+            </li>
+            <li class="changelink">
+                <a href="/data-admin/data-export/?format=json">
+                    Export All Data (JSON)
+                </a>
+            </li>
+            <li class="changelink">
+                <a href="/data-admin/data-export/?format=csv">
+                    Export Claims (CSV)
+                </a>
+            </li>
+            <li class="changelink">
+                <a href="/data-admin/">
+                    Data Management Admin
+                </a>
+            </li>
+            <li class="changelink">
+                <a href="/claims/">
+                    Claims Interface
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

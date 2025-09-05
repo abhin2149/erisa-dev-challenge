@@ -1,0 +1,26 @@
+/* Custom table header alignment */
+.table th.text-end {
+    text-align: right !important;
+}
+
+/* Ensure monetary columns are properly aligned */
+.table th:nth-child(3),
+.table th:nth-child(4) {
+    text-align: right !important;
+}
+
+/* Custom status badge styling (optional improvements) */
+.status-paid {
+    background-color: #198754 !important;
+    color: white !important;
+}
+
+.status-denied {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+.status-under-review {
+    background-color: #fd7e14 !important;
+    color: white !important;
+}

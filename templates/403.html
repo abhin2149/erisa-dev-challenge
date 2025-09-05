@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Access Denied - Claims Management System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow border-warning">
+            <div class="card-header bg-warning text-dark text-center">
+                <h4 class="mb-0">
+                    <i class="bi bi-shield-exclamation"></i> Access Denied
+                </h4>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <i class="bi bi-lock-fill display-1 text-warning"></i>
+                </div>
+                
+                <h5 class="text-dark mb-3">Administrator Access Required</h5>
+                
+                <p class="text-muted mb-4">
+                    Sorry, you don't have permission to access the dashboard. 
+                    This area is restricted to administrators only.
+                </p>
+                
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Note:</strong> If you believe you should have access to this area, 
+                    please contact your system administrator.
+                </div>
+                
+                <div class="d-grid gap-2 d-md-block">
+                    <a href="{% url 'claims:claims_list' %}" class="btn btn-primary">
+                        <i class="bi bi-list-ul"></i> Back to Claims List
+                    </a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'logout' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-box-arrow-in-right"></i> Login as Admin
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Info -->
+        {% if user.is_authenticated %}
+        <div class="card mt-3 border-light">
+            <div class="card-body text-center">
+                <small class="text-muted">
+                    <i class="bi bi-person"></i> Currently logged in as: <strong>{{ user.username }}</strong>
+                    {% if not user.is_superuser and not user.is_staff %}
+                        (Regular User)
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

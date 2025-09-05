@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Dashboard - Claims Management System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="fw-bold text-primary">
+            <i class="bi bi-graph-up"></i> Dashboard
+        </h2>
+        <p class="text-muted">Claims management overview and statistics</p>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card text-center">
+            <div class="card-body">
+                <i class="bi bi-clipboard2-data display-4 mb-2"></i>
+                <h4 class="fw-bold">{{ stats.total_claims|default:0 }}</h4>
+                <p class="mb-0">Total Claims</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-warning text-white text-center">
+            <div class="card-body">
+                <i class="bi bi-flag-fill display-4 mb-2"></i>
+                <h4 class="fw-bold">{{ stats.total_flagged|default:0 }}</h4>
+                <p class="mb-0">Flagged Claims</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-success text-white text-center">
+            <div class="card-body">
+                <i class="bi bi-currency-dollar display-4 mb-2"></i>
+                <h4 class="fw-bold">${{ stats.total_paid|floatformat:0|intcomma|default:0 }}</h4>
+                <p class="mb-0">Total Paid</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-info text-white text-center">
+            <div class="card-body">
+                <i class="bi bi-graph-down display-4 mb-2"></i>
+                <h4 class="fw-bold">${{ stats.avg_underpayment|floatformat:0|intcomma|default:0 }}</h4>
+                <p class="mb-0">Avg. Underpayment</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Financial Overview -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-pie-chart"></i> Financial Overview
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h6 class="text-muted">Total Billed</h6>
+                        <h4 class="text-danger">${{ stats.total_billed|floatformat:2|intcomma|default:0 }}</h4>
+                    </div>
+                    <div class="col-6">
+                        <h6 class="text-muted">Total Paid</h6>
+                        <h4 class="text-success">${{ stats.total_paid|floatformat:2|intcomma|default:0 }}</h4>
+                    </div>
+                </div>
+                <hr>
+                <div class="text-center">
+                    <h6 class="text-muted">Outstanding Amount</h6>
+                    <h4 class="text-warning">
+                        ${{ stats.outstanding_amount|floatformat:2|intcomma|default:0 }}
+                    </h4>
+                    <small class="text-muted">
+                        Payment Rate: 
+                        {% if stats.total_billed > 0 %}
+                            {% widthratio stats.total_paid stats.total_billed 100 %}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-bar-chart"></i> Status Breakdown
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for status in status_breakdown %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            {% if status.status == 'Paid' %}
+                                <span class="badge status-paid claim-status">
+                                    <i class="bi bi-check-circle"></i> {{ status.status }}
+                                </span>
+                            {% elif status.status == 'Denied' %}
+                                <span class="badge status-denied claim-status">
+                                    <i class="bi bi-x-circle"></i> {{ status.status }}
+                                </span>
+                            {% else %}
+                                <span class="badge status-under-review claim-status">
+                                    <i class="bi bi-clock"></i> {{ status.status }}
+                                </span>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <span class="badge bg-secondary">{{ status.count }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-flag-fill"></i> Recent Flags
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for flag in recent_flags %}
+                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                        <div>
+                            <div class="fw-semibold">
+                                <a href="{% url 'claims:claims_list' %}?search={{ flag.claim.patient_name }}" 
+                                   class="text-decoration-none">
+                                    Claim #{{ flag.claim.id }}
+                                </a>
+                            </div>
+                            <small class="text-muted">{{ flag.claim.patient_name }}</small>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted">{{ flag.user.username }}</small>
+                            <br>
+                            <small class="text-muted">{{ flag.created_at|date:"M j, H:i" }}</small>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-flag display-4"></i>
+                        <div class="mt-2">No recent flags</div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-chat-square-text"></i> Recent Notes
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for note in recent_notes %}
+                    <div class="d-flex justify-content-between align-items-start mb-2 pb-2 border-bottom">
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold">
+                                <a href="{% url 'claims:claims_list' %}?search={{ note.claim.patient_name }}" 
+                                   class="text-decoration-none">
+                                    Claim #{{ note.claim.id }}
+                                </a>
+                            </div>
+                            <small class="text-muted d-block">{{ note.claim.patient_name }}</small>
+                            <small class="text-truncate d-block" style="max-width: 200px;">
+                                {{ note.text|truncatechars:50 }}
+                            </small>
+                        </div>
+                        <div class="text-end ms-2">
+                            <small class="text-muted">{{ note.user.username }}</small>
+                            <br>
+                            <small class="text-muted">{{ note.created_at|date:"M j, H:i" }}</small>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-chat-square display-4"></i>
+                        <div class="mt-2">No recent notes</div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
