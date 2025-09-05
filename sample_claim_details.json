@@ -1,0 +1,17 @@
+[
+  {
+    "claim_id": 99001,
+    "cpt_codes": "99204, 82947",
+    "denial_reason": ""
+  },
+  {
+    "claim_id": 99002,
+    "cpt_codes": "99213, 85027",
+    "denial_reason": "Insufficient documentation provided"
+  },
+  {
+    "claim_id": 99003,
+    "cpt_codes": "99215, 80053, 36415",
+    "denial_reason": ""
+  }
+]

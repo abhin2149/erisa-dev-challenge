@@ -1,0 +1,32 @@
+[
+  {
+    "id": 99001,
+    "patient_name": "John Doe",
+    "billed_amount": "15000.50",
+    "paid_amount": "12000.00",
+    "status": "Paid",
+    "insurer_name": "Blue Cross",
+    "discharge_date": "2025-01-15",
+    "burger_combo_code": "BC001"
+  },
+  {
+    "id": 99002,
+    "patient_name": "Jane Smith",
+    "billed_amount": "8750.25",
+    "paid_amount": "0.00",
+    "status": "Denied",
+    "insurer_name": "Aetna",
+    "discharge_date": "2025-01-20",
+    "burger_combo_code": "BC002"
+  },
+  {
+    "id": 99003,
+    "patient_name": "Bob Johnson",
+    "billed_amount": "12500.00",
+    "paid_amount": "10000.00",
+    "status": "Under Review",
+    "insurer_name": "Cigna",
+    "discharge_date": "2025-01-25",
+    "burger_combo_code": "BC003"
+  }
+]

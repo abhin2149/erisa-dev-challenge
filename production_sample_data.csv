@@ -1,0 +1,6 @@
+id|patient_name|billed_amount|paid_amount|status|insurer_name|discharge_date|burger_combo_code
+1001|John Smith|1500.00|1200.00|Paid|Blue Cross|2024-01-15|BC001
+1002|Sarah Johnson|2800.75|0.00|Denied|Aetna|2024-01-20|BC002
+1003|Mike Wilson|950.50|850.00|Paid|Cigna|2024-01-22|BC003
+1004|Lisa Brown|3200.25|2400.00|Under Review|United Healthcare|2024-01-25|BC004
+1005|David Lee|1850.00|1850.00|Paid|Humana|2024-01-28|BC005

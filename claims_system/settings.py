@@ -31,17 +31,29 @@ if not SECRET_KEY:
     else:
         raise ValueError("SECRET_KEY environment variable must be set in production")
 
-# Fix security vulnerability - don't allow all hosts even in DEBUG
+# Configure ALLOWED_HOSTS for different environments
+# Always include Railway domains regardless of DEBUG setting
+ALLOWED_HOSTS = [
+    'web-production-c249d.up.railway.app',
+    '.railway.app',  # Allow any Railway subdomain
+    '.up.railway.app',  # Allow any up.railway.app subdomain
+]
+
+# Add development hosts if in DEBUG mode
 if DEBUG:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
-else:
-    # Production allowed hosts
-    ALLOWED_HOSTS = ['web-production-c249d.up.railway.app']
-    
-    # Add any additional hosts from environment variable
-    additional_host = os.environ.get('ALLOWED_HOST')
-    if additional_host:
-        ALLOWED_HOSTS.append(additional_host)
+    ALLOWED_HOSTS.extend(['localhost', '127.0.0.1', '0.0.0.0'])
+
+# Add any additional hosts from environment variable
+additional_host = os.environ.get('ALLOWED_HOST')
+if additional_host:
+    ALLOWED_HOSTS.append(additional_host)
+
+# Detect Railway deployment and ensure proper configuration
+if os.environ.get('RAILWAY_ENVIRONMENT_NAME'):
+    # We're on Railway - ensure Railway domains are allowed
+    railway_host = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+    if railway_host and railway_host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(railway_host)
 
 
 # Application definition
@@ -98,6 +110,12 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Ensure database directory exists in production
+import os
+if not DEBUG:
+    db_path = BASE_DIR / 'db.sqlite3'
+    os.makedirs(db_path.parent, exist_ok=True)
 
 
 # Password validation
