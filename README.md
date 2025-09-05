@@ -41,7 +41,10 @@ pip install -r requirements.txt
 # 3. Activate venv
 source venv/bin/activate
 
-#4. Start server
+# 4. Run setup
+bash start.sh
+
+# 4. Start server
 python manage.py runserver
 ```
 
