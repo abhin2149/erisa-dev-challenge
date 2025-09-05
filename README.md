@@ -33,7 +33,7 @@ A comprehensive Django web application for managing insurance claims with modern
 ```bash
 # 1. Clone the repo and Navigate to project
 git clone https://github.com/abhin2149/erisa-dev-challenge
-cd insurance-claim-app
+cd erisa-dev-challenge
 
 # 2. Install requirements  
 pip install -r requirements.txt
