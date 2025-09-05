@@ -6,6 +6,8 @@
 set -e  # Exit on any error
 
 echo "🚀 Starting Django Claims Management System deployment..."
+echo "📍 Current directory: $(pwd)"
+echo "📁 Files in directory: $(ls -la)"
 
 # Run database migrations
 echo "📊 Running database migrations..."
