@@ -46,7 +46,7 @@ python manage.py runserver
 ```
 
 ### 🔐 Access Credentials
-- **Admin User**: `admin` / `admin` (Full access + dashboard)
+- **Admin User**: `admin` / `admin123` (Full access + dashboard)
 - **Regular User**: `testuser` / `testpass` (Claims access only)
 
 ### 🌐 Application URLs
